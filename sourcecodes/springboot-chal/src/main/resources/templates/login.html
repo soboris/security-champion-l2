@@ -42,6 +42,19 @@
 <div th:replace="~{fragments/topnav :: topnav}"></div>
 
 <div class="container">
+    <!-- FIXED: API Configuration Data Attributes using proper Thymeleaf URL expressions -->
+    <div id="apiConfig" style="display: none;"
+         th:data-login-url="@{/login}"
+         th:data-users-url="@{/users}"
+         th:data-books-url="@{/books}"
+         th:data-cart-url="@{/cart}"
+         th:data-checkout-url="@{/checkout}"
+         th:data-api-users="@{/api/users}"
+         th:data-api-cart="@{/api/cart}"
+         th:data-api-profile="@{/api/profile}"
+         th:data-api-auth-login="@{/api/auth/login}">
+    </div>
+    
     <div class="login-container">
         <div class="login-header">
             <div class="logo">B</div>
@@ -82,7 +95,7 @@
 
         <!-- Forgot Password -->
         <div class="text-center mt-3">
-            <a href="/forgot-password" class="text-decoration-none">
+            <a th:href="@{/forgot-password}" class="text-decoration-none">
                 Forgot your password?
             </a>
         </div>
@@ -90,7 +103,7 @@
         <!-- New Customer -->
         <div class="text-center mt-4">
             <p class="mb-2">New to SecBooks?</p>
-            <a href="/register" class="btn btn-outline-success">
+            <a th:href="@{/register}" class="btn btn-outline-success">
                 Create Account
             </a>
         </div>
@@ -141,10 +154,10 @@
             </div>
             <div class="col-md-4">
                 <h5>Quick Links</h5>
-                <a href="/help" class="text-light d-block">Help Center</a>
-                <a href="/shipping" class="text-light d-block">Shipping Info</a>
-                <a href="/returns" class="text-light d-block">Returns & Exchanges</a>
-                <a href="/privacy" class="text-light d-block">Privacy Policy</a>
+                <a th:href="@{/help}" class="text-light d-block">Help Center</a>
+                <a th:href="@{/shipping}" class="text-light d-block">Shipping Info</a>
+                <a th:href="@{/returns}" class="text-light d-block">Returns & Exchanges</a>
+                <a th:href="@{/privacy}" class="text-light d-block">Privacy Policy</a>
             </div>
         </div>
         <hr class="my-4">
@@ -157,20 +170,25 @@
 <script th:src="@{/js/jquery.min.js}"></script>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 <script>
-    // Check if user is already authenticated with a valid token
+    // FIXED: Check if user is already authenticated with a valid token
     function checkAuthStatus() {
         const token = localStorage.getItem("authToken");
         if (token) {
+            // Get URLs from data attributes
+            const apiConfig = $('#apiConfig');
+            const usersApiUrl = apiConfig.data('api-users');
+            const usersUrl = apiConfig.data('users-url');
+            
             // Validate token by making a test API call
             $.ajax({
-                url: '/api/users',
+                url: usersApiUrl,
                 type: 'GET',
                 headers: {
                     'Authorization': 'Bearer ' + token
                 },
                 success: function(response) {
-                    // Token is valid, redirect to users page
-                    window.location.href = "/users";
+                    // Token is valid, redirect to users page using Thymeleaf URL
+                    window.location.href = usersUrl;
                 },
                 error: function(xhr) {
                     // Token is invalid/expired, remove it and stay on login page
@@ -210,8 +228,13 @@
         const originalText = submitBtn.html();
         submitBtn.html('🔄 Signing in...').prop('disabled', true);
 
+        // FIXED: Get URLs from data attributes
+        const apiConfig = $('#apiConfig');
+        const loginApiUrl = apiConfig.data('api-auth-login');
+        const usersUrl = apiConfig.data('users-url');
+
         $.ajax({
-            url: '/api/auth/login',
+            url: loginApiUrl,
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ email, password }),
@@ -220,7 +243,7 @@
                 $('#errorText').removeClass('text-danger').addClass('text-success')
                     .text('✅ Login successful! Redirecting to your dashboard...');
                 setTimeout(() => {
-                    window.location.href = '/users';
+                    window.location.href = usersUrl;
                 }, 1000);
             },
             error: function (xhr) {

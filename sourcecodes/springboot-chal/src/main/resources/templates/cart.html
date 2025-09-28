@@ -69,6 +69,15 @@
     <!-- Include navigation -->
     <div th:replace="~{fragments/topnav :: topnav}"></div>
 
+    <!-- FIXED: API Configuration Data Attributes using proper Thymeleaf URL expressions -->
+    <div id="apiConfig" style="display: none;"
+         th:data-checkout-url="@{/checkout}"
+         th:data-books-url="@{/books}"
+         th:data-api-cart="@{/api/cart}"
+         th:data-api-users="@{/api/users}"
+         th:data-api-cart-items="@{/api/cart/items}">
+    </div>
+    
     <div class="container mt-4">
         <div class="row">
             <div class="col-md-8">
@@ -86,7 +95,7 @@
                 <div id="empty-cart" class="empty-cart" style="display: none;">
                     <h4>Your cart is empty</h4>
                     <p>Browse our collection and add some books to your cart!</p>
-                    <a href="/books" class="btn btn-primary">Browse Books</a>
+                    <a th:href="@{/books}" class="btn btn-primary">Browse Books</a>
                 </div>
                 
                 <!-- Cart items -->
@@ -145,8 +154,12 @@
                     return;
                 }
                 
+                // FIXED: Get checkout URL from data attributes
+                const apiConfig = $('#apiConfig');
+                const checkoutUrl = apiConfig.data('checkout-url');
+                
                 // Redirect to checkout confirmation page
-                window.location.href = '/checkout';
+                window.location.href = checkoutUrl;
             });
         });
         
@@ -162,15 +175,20 @@
             $('#empty-cart').hide();
             $('#cart-items').empty();
             
+            // FIXED: Get API URLs from data attributes
+            const apiConfig = $('#apiConfig');
+            const cartApiUrl = apiConfig.data('api-cart');
+            const usersApiUrl = apiConfig.data('api-users');
+            
             // Load cart items and user credit info in parallel
             Promise.all([
                 $.ajax({
-                    url: '/api/cart',
+                    url: cartApiUrl,
                     type: 'GET',
                     headers: { 'Authorization': 'Bearer ' + token }
                 }),
                 $.ajax({
-                    url: '/api/users',
+                    url: usersApiUrl,
                     type: 'GET',
                     headers: { 'Authorization': 'Bearer ' + token }
                 })
@@ -274,8 +292,12 @@
             
             const token = localStorage.getItem('authToken');
             
+            // FIXED: Get API URL from data attributes
+            const apiConfig = $('#apiConfig');
+            const cartItemsApiUrl = apiConfig.data('api-cart-items');
+            
             $.ajax({
-                url: `/api/cart/items/${itemId}`,
+                url: `${cartItemsApiUrl}/${itemId}`,
                 type: 'PUT',
                 headers: {
                     'Authorization': 'Bearer ' + token,
@@ -303,8 +325,12 @@
             
             const token = localStorage.getItem('authToken');
             
+            // FIXED: Get API URL from data attributes
+            const apiConfig = $('#apiConfig');
+            const cartItemsApiUrl = apiConfig.data('api-cart-items');
+            
             $.ajax({
-                url: `/api/cart/items/${itemId}`,
+                url: `${cartItemsApiUrl}/${itemId}`,
                 type: 'DELETE',
                 headers: {
                     'Authorization': 'Bearer ' + token

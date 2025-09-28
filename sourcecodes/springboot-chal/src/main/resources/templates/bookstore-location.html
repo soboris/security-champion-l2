@@ -24,7 +24,7 @@
             <h3>Find Nearby Bookstores</h3>
         </div>
         <div class="card-body">
-            <form action="/bookstore-location" method="post">
+            <form th:action="@{/bookstore-location}" method="post">
                 <div class="mb-3">
                     <label for="location" class="form-label">Enter your location:</label>
                     <input type="text" class="form-control" id="location" name="location" required

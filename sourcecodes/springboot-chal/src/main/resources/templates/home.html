@@ -33,7 +33,7 @@
                 <div class="card-body text-center">
                     <h5 class="card-title">Browse Books</h5>
                     <p class="card-text">Search our extensive catalog</p>
-                    <a href="/books" class="btn btn-primary">Browse Catalog</a>
+                    <a th:href="@{/books}" class="btn btn-primary">Browse Catalog</a>
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@
                 <div class="card-body text-center">
                     <h5 class="card-title">My Account</h5>
                     <p class="card-text">Manage your profile and orders</p>
-                    <a href="/login" class="btn btn-success">Sign In</a>
+                    <a th:href="@{/login}" class="btn btn-success">Sign In</a>
                 </div>
             </div>
         </div>
@@ -51,7 +51,7 @@
                 <div class="card-body text-center">
                     <h5 class="card-title">Store Locator</h5>
                     <p class="card-text">Find SecBooks stores near you</p>
-                    <a href="/bookstore-location" class="btn btn-info">Find Stores</a>
+                    <a th:href="@{/bookstore-location}" class="btn btn-info">Find Stores</a>
                 </div>
             </div>
         </div>
@@ -62,12 +62,12 @@
         <div class="col-md-6">
             <h3>Store Management</h3>
             <p>Access admin features and store analytics</p>
-            <a href="/users" class="btn btn-warning">Staff Dashboard</a>
+            <a th:href="@{/users}" class="btn btn-warning">Staff Dashboard</a>
         </div>
         <div class="col-md-6">
             <h3>Advanced Search</h3>
             <p>Use our enhanced search with filters</p>
-            <a href="/advanced_search" class="btn btn-secondary">Advanced Search</a>
+            <a th:href="@{/advanced_search}" class="btn btn-secondary">Advanced Search</a>
         </div>
     </div>
 

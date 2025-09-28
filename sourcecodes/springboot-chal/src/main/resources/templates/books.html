@@ -19,6 +19,15 @@
 <div th:replace="~{fragments/topnav :: topnav}"></div>
 
 <div class="container mt-4">
+    <!-- FIXED: API Configuration Data Attributes using proper Thymeleaf URL expressions -->
+    <div id="apiConfig" style="display: none;"
+         th:data-purchase-status="@{/api/purchase/status}"
+         th:data-cart-add="@{/api/cart/add}"
+         th:data-cart="@{/api/cart}"
+         th:data-purchase-book="@{/api/purchase/book}"
+         th:data-purchase-confirm-url="@{/purchase/confirm}">
+    </div>
+    
     <div class="row">
         <div class="col-md-3">
             <!-- Sidebar -->
@@ -28,7 +37,7 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="/books" class="btn btn-outline-primary btn-sm" 
+                        <a th:href="@{/books}" class="btn btn-outline-primary btn-sm" 
                            th:classappend="${currentCategory == null} ? 'active' : ''">All Books</a>
                         <a th:each="cat : ${categories}" 
                            th:href="@{/books(category=${cat})}" 
@@ -61,7 +70,7 @@
             <!-- Search Bar -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <form method="get" action="/books">
+                    <form method="get" th:action="@{/books}">
                         <div class="row">
                             <div class="col-md-10">
                                 <input type="text" name="search" class="form-control" 
@@ -136,7 +145,7 @@
             <div th:if="${books.empty}" class="text-center mt-5">
                 <h4>No books found</h4>
                 <p class="text-muted">Try adjusting your search criteria or browse different categories.</p>
-                <a href="/books" class="btn btn-primary">View All Books</a>
+                <a th:href="@{/books}" class="btn btn-primary">View All Books</a>
             </div>
         </div>
     </div>
@@ -184,8 +193,11 @@ function checkPurchaseStatus() {
         return;
     }
     
+    const apiConfig = $('#apiConfig');
+    const purchaseStatusUrl = apiConfig.data('purchase-status');
+    
     $.ajax({
-        url: '/api/purchase/status',
+        url: purchaseStatusUrl,
         type: 'GET',
         headers: {
             'Authorization': 'Bearer ' + authToken
@@ -244,8 +256,11 @@ function addToCart(bookId, bookTitle, bookPrice, quantity) {
     // Show loading state
     $(`.add-to-cart-btn[data-book-id="${bookId}"]`).prop('disabled', true).text('Adding...');
     
+    const apiConfig = $('#apiConfig');
+    const cartAddUrl = apiConfig.data('cart-add');
+    
     $.ajax({
-        url: '/api/cart/add',
+        url: cartAddUrl,
         type: 'POST',
         headers: {
             'Authorization': 'Bearer ' + token,
@@ -283,8 +298,11 @@ function updateCartCount() {
     
     if (!token) return;
     
+    const apiConfig = $('#apiConfig');
+    const cartUrl = apiConfig.data('cart');
+    
     $.ajax({
-        url: '/api/cart',
+        url: cartUrl,
         type: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token
@@ -311,8 +329,11 @@ function purchaseBook(bookId, bookTitle, bookPrice) {
     const button = $(`button[data-book-id="${bookId}"]`);
     button.prop('disabled', true).text('Processing...');
     
+    const apiConfig = $('#apiConfig');
+    const purchaseBookUrl = apiConfig.data('purchase-book');
+    
     $.ajax({
-        url: '/api/purchase/book',
+        url: purchaseBookUrl,
         type: 'POST',
         headers: {
             'Authorization': 'Bearer ' + authToken,
@@ -334,8 +355,12 @@ function purchaseBook(bookId, bookTitle, bookPrice) {
             
             localStorage.setItem('purchaseConfirmation', JSON.stringify(confirmationData));
             
+            // FIXED: Get confirmation URL from data attributes
+            const apiConfig = $('#apiConfig');
+            const confirmUrl = apiConfig.data('purchase-confirm-url');
+            
             // Redirect to confirmation page
-            window.location.href = `/purchase/confirm?sessionId=${response.sessionId}`;
+            window.location.href = `${confirmUrl}?sessionId=${response.sessionId}`;
         },
         error: function(xhr) {
             // Re-enable the button

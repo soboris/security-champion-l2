@@ -56,6 +56,15 @@
     <!-- Include navigation -->
     <div th:replace="~{fragments/topnav :: topnav}"></div>
 
+    <!-- FIXED: API Configuration Data Attributes using proper Thymeleaf URL expressions -->
+    <div id="apiConfig" style="display: none;"
+         th:data-cart-url="@{/cart}"
+         th:data-users-url="@{/users}"
+         th:data-api-cart-checkout="@{/api/cart/checkout}"
+         th:data-api-cart-checkout-confirm="@{/api/cart/checkout/confirm}"
+         th:data-api-cart-checkout-cancel="@{/api/cart/checkout/cancel}">
+    </div>
+    
     <div class="container mt-4">
         <div class="row justify-content-center">
             <div class="col-md-8">
@@ -152,8 +161,12 @@
                 return;
             }
 
+            // FIXED: Get API URL from data attributes
+            const apiConfig = $('#apiConfig');
+            const checkoutUrl = apiConfig.data('api-cart-checkout');
+
             $.ajax({
-                url: '/api/cart/checkout',
+                url: checkoutUrl,
                 type: 'POST',
                 headers: {
                     'Authorization': 'Bearer ' + token,
@@ -258,8 +271,11 @@
                 if (remaining <= 0) {
                     clearInterval(countdownInterval);
                     showError('Checkout session expired. Please try again.');
+                    // FIXED: Get cart URL from data attributes
+                    const apiConfig = $('#apiConfig');
+                    const cartUrl = apiConfig.data('cart-url');
                     setTimeout(() => {
-                        window.location.href = '/cart';
+                        window.location.href = cartUrl;
                     }, 3000);
                 }
             }, 1000);
@@ -271,8 +287,13 @@
             // Disable button and show loading
             $('#confirm-btn').prop('disabled', true).text('Processing Purchase...');
             
+            // FIXED: Get API URL from data attributes
+            const apiConfig = $('#apiConfig');
+            const confirmUrl = apiConfig.data('api-cart-checkout-confirm');
+            const usersUrl = apiConfig.data('users-url');
+            
             $.ajax({
-                url: '/api/cart/checkout/confirm',
+                url: confirmUrl,
                 type: 'POST',
                 headers: {
                     'Authorization': 'Bearer ' + token,
@@ -288,7 +309,7 @@
                     }
                     
                     // Redirect to My Library
-                    window.location.href = '/users';
+                    window.location.href = usersUrl;
                 },
                 error: function(xhr, status, error) {
                     console.error('Purchase confirmation error:', xhr.responseText);
@@ -306,15 +327,20 @@
             if (confirm('Are you sure you want to cancel this checkout?')) {
                 const token = localStorage.getItem('authToken');
                 
+                // FIXED: Get API URL from data attributes
+                const apiConfig = $('#apiConfig');
+                const cancelUrl = apiConfig.data('api-cart-checkout-cancel');
+                const cartUrl = apiConfig.data('cart-url');
+                
                 $.ajax({
-                    url: '/api/cart/checkout/cancel',
+                    url: cancelUrl,
                     type: 'POST',
                     headers: {
                         'Authorization': 'Bearer ' + token
                     },
                     complete: function() {
                         clearInterval(countdownInterval);
-                        window.location.href = '/cart';
+                        window.location.href = cartUrl;
                     }
                 });
             }
@@ -322,10 +348,15 @@
 
         function showError(message) {
             $('#checkout-details').hide();
+            
+            // FIXED: Get cart URL from data attributes
+            const apiConfig = $('#apiConfig');
+            const cartUrl = apiConfig.data('cart-url');
+            
             $('#error-message').html(`
                 <h5>Error</h5>
                 <p>${message}</p>
-                <button class="btn btn-primary" onclick="window.location.href='/cart'">
+                <button class="btn btn-primary" onclick="window.location.href='${cartUrl}'">
                     Return to Cart
                 </button>
             `).show();

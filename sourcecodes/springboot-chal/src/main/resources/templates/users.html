@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>My Library - SecBooks</title>
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="/js/jquery.min.js"></script>
+    <script th:src="@{/js/jquery.min.js}"></script>
     <style>
         .dashboard-card {
             border-radius: 10px;
@@ -89,6 +89,22 @@
 </head>
 <body class="bg-light">
 
+<!-- FIXED: API Configuration Data Attributes using proper Thymeleaf URL expressions -->
+<div id="apiConfig" style="display: none;"
+        th:data-login-url="@{/login}"
+        th:data-users-url="@{/users}"
+        th:data-books-url="@{/books}"
+        th:data-cart-url="@{/cart}"
+        th:data-checkout-url="@{/checkout}"
+        th:data-api-users="@{/api/users}"
+        th:data-api-cart="@{/api/cart}"
+        th:data-api-profile="@{/api/profile}"
+        th:data-api-auth-login="@{/api/auth/login}"
+        th:data-api-auth-register="@{/api/auth/register}"
+        th:data-api-user-books-with-quantities="@{/api/user/books-with-quantities}"
+        th:data-api-sms-send="@{/api/sms/send}">
+</div>
+
 <!-- Include navigation fragment -->
 <div th:replace="~{fragments/topnav :: topnav}"></div>
 
@@ -101,9 +117,9 @@
                 <h1>Welcome to Your Library!</h1>
                 <p class="lead mb-3">Discover, read, and manage your book collection</p>
                 <div>
-                    <a href="/books" class="btn btn-light quick-action-btn">Browse Books</a>
-                    <a href="/advanced_search" class="btn btn-light quick-action-btn">Advanced Search</a>
-                    <a href="/help" class="btn btn-light quick-action-btn">Help</a>
+                    <a th:href="@{/books}" class="btn btn-light quick-action-btn">Browse Books</a>
+                    <a th:href="@{/advanced_search}" class="btn btn-light quick-action-btn">Advanced Search</a>
+                    <a th:href="@{/help}" class="btn btn-light quick-action-btn">Help</a>
                 </div>
             </div>
             <div class="col-md-4 text-center">
@@ -176,7 +192,7 @@
                         </div>
                     </div>
                     <div th:if="${currentlyReading == null or currentlyReading.isEmpty()}" class="text-center text-muted">
-                        <p>You haven't started reading any books yet. <a href="/books" class="text-primary">Browse our collection</a> to get started!</p>
+                        <p>You haven't started reading any books yet. <a th:href="@{/books}" class="text-primary">Browse our collection</a> to get started!</p>
                     </div>
                 </div>
             </div>
@@ -235,7 +251,7 @@
                 <div class="h1 text-primary">U</div>
                 <h6 id="profileName">Loading...</h6>
                 <p class="text-muted small" id="profileEmail">Loading...</p>
-                <a href="/profile" class="btn btn-outline-primary btn-sm">Edit Profile</a>
+                <a th:href="@{/profile}" class="btn btn-outline-primary btn-sm">Edit Profile</a>
             </div>
 
             <!-- Account Status Section -->
@@ -259,7 +275,7 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="/advanced_search" class="btn btn-outline-primary btn-sm">Advanced Search</a>
+                        <a th:href="@{/advanced_search}" class="btn btn-outline-primary btn-sm">Advanced Search</a>
                         <button class="btn btn-outline-success btn-sm" onclick="alert('Not implemented')">Purchase History</button>
                         <button class="btn btn-outline-info btn-sm" onclick="alert('Not implemented')">Download App</button>
                         <button class="btn btn-outline-warning btn-sm" onclick="alert('Not implemented')">Gift Cards</button>
@@ -294,10 +310,10 @@
                                 </div>
                             </div>
                         </div>
-                        <a href="/books" class="btn btn-info btn-sm w-100">View All Recommendations</a>
+                        <a th:href="@{/books}" class="btn btn-info btn-sm w-100">View All Recommendations</a>
                     </div>
                     <div th:if="${recommendedBooks == null or recommendedBooks.isEmpty()}" class="text-center text-muted">
-                        <p class="small">No recommendations available. <a href="/books" class="text-primary">Browse books</a> to get personalized recommendations!</p>
+                        <p class="small">No recommendations available. <a th:href="@{/books}" class="text-primary">Browse books</a> to get personalized recommendations!</p>
                     </div>
                 </div>
             </div>
@@ -351,7 +367,7 @@
     <div class="alert alert-warning">
         <h4>Access Required</h4>
         <p>Please log in to access your SecBooks library</p>
-        <a href="/login" class="btn btn-primary">Sign In</a>
+        <a th:href="@{/login}" class="btn btn-primary">Sign In</a>
     </div>
 </div>
 
@@ -365,11 +381,15 @@
 
 <script>
     const authToken = localStorage.getItem("authToken");
-
+    const apiConfig = $('#apiConfig');
+    const usersApiUrl = apiConfig.data('api-users');
+    const usersUrl = apiConfig.data('users-url');
+    const booksQuantitleUrl = apiConfig.data('api-user-books-with-quantities');
+    const smsSendUrl = apiConfig.data('api-sms-send')
     if (!authToken) {
         $("#unauthContainer").show();
     } else {
-        fetch('/api/users', {
+        fetch(usersApiUrl, {
             headers: {
                 'Authorization': 'Bearer ' + authToken
             }
@@ -445,7 +465,7 @@
         }
 
         $.ajax({
-            url: '/api/sms/send',
+            url: smsSendUrl,
             type: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + authToken,
@@ -512,7 +532,7 @@
         }
 
         $.ajax({
-            url: '/api/user/books-with-quantities',
+            url: booksQuantitleUrl,
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token
@@ -577,7 +597,7 @@
                     $("#ownedBooksContainer").html(`
                         <div class="text-center text-muted">
                             <p>You haven't purchased any books yet.</p>
-                            <a href="/books" class="btn btn-primary btn-sm">Browse Books</a>
+                            <a th:href="@{/books}" class="btn btn-primary btn-sm">Browse Books</a>
                         </div>
                     `);
                 }

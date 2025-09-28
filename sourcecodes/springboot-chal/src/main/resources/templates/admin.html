@@ -5,7 +5,7 @@
     <title>Admin Panel - SecChamp Library</title>
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/}"></script>
     <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </head>
 <body>
@@ -14,6 +14,22 @@
 <div th:replace="~{fragments/topnav :: topnav}"></div>
 
 <div class="container mt-4">
+    <!-- FIXED: API Configuration Data Attributes using proper Thymeleaf URL expressions -->
+    <div id="apiConfig" style="display: none;"
+         th:data-login-url="@{/login}"
+         th:data-home-url="@{/}"
+         th:data-users-url="@{/users}"
+         th:data-books-url="@{/books}"
+         th:data-cart-url="@{/cart}"
+         th:data-checkout-url="@{/checkout}"
+         th:data-api-users="@{/api/users}"
+         th:data-api-cart="@{/api/cart}"
+         th:data-api-profile="@{/api/profile}"
+         th:data-api-auth-login="@{/api/auth/login}"
+         th:data-admin-users-api="@{/api/admin/users}"
+         th:data-admin-books-api="@{/api/admin/books}">
+    </div>
+    
     <div class="row">
         <div class="col-12">
             <h1>Admin Panel</h1>
@@ -437,7 +453,10 @@
         const authToken = localStorage.getItem("authToken");
         
         if (!authToken) {
-            window.location.href = "/login";
+            // FIXED: Get login URL from data attributes
+            const apiConfig = $('#apiConfig');
+            const loginUrl = apiConfig.data('login-url');
+            window.location.href = loginUrl;
             return;
         }
 
@@ -450,9 +469,13 @@
 
     function checkAdminAccess() {
         const authToken = localStorage.getItem("authToken");
+        const apiConfig = $('#apiConfig');
+        const usersApiUrl = apiConfig.data('api-users');
+        const loginUrl = apiConfig.data('login-url');
+        const homeUrl = apiConfig.data('home-url');
         
         $.ajax({
-            url: '/api/users',
+            url: usersApiUrl,
             type: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + authToken
@@ -462,21 +485,23 @@
                 if (!currentUser.admin) {
                     showError('Access denied. Administrator privileges required.');
                     setTimeout(() => {
-                        window.location.href = "/";
+                        window.location.href = homeUrl;
                     }, 2000);
                 }
             },
             error: function(xhr) {
-                window.location.href = "/login";
+                window.location.href = loginUrl;
             }
         });
     }
 
     function loadUsers() {
         const authToken = localStorage.getItem("authToken");
+        const apiConfig = $('#apiConfig');
+        const adminUsersApiUrl = apiConfig.data('admin-users-api');
         
         $.ajax({
-            url: '/api/admin/users',
+            url: adminUsersApiUrl,
             type: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + authToken
@@ -528,7 +553,7 @@
                 if (userIdFromTable === userId) {
                     // Get user data from API to populate form
                     $.ajax({
-                        url: '/api/admin/users',
+                        url: adminUsersApiUrl,
                         type: 'GET',
                         headers: {
                             'Authorization': 'Bearer ' + authToken
@@ -699,9 +724,11 @@
     // Book Management Functions
     function loadBooks() {
         const authToken = localStorage.getItem("authToken");
+        const apiConfig = $('#apiConfig');
+        const adminBooksApiUrl = apiConfig.data('admin-books-api');
         
         $.ajax({
-            url: '/api/admin/books',
+            url: adminBooksApiUrl,
             type: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + authToken

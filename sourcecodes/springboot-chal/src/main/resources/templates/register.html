@@ -46,6 +46,20 @@
 <div th:replace="~{fragments/topnav :: topnav}"></div>
 
 <div class="container">
+    <!-- FIXED: API Configuration Data Attributes using proper Thymeleaf URL expressions -->
+    <div id="apiConfig" style="display: none;"
+         th:data-login-url="@{/login}"
+         th:data-users-url="@{/users}"
+         th:data-books-url="@{/books}"
+         th:data-cart-url="@{/cart}"
+         th:data-checkout-url="@{/checkout}"
+         th:data-api-users="@{/api/users}"
+         th:data-api-cart="@{/api/cart}"
+         th:data-api-profile="@{/api/profile}"
+         th:data-api-auth-login="@{/api/auth/login}"
+         th:data-api-auth-register="@{/api/auth/register}">
+    </div>
+    
     <div class="register-container">
         <div class="register-header">
             <div class="logo">SecBooks</div>
@@ -166,7 +180,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
                         <label class="form-check-label" for="terms">
-                            I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>
+                            I agree to the <a th:href="@{/terms}">Terms of Service</a> and <a th:href="@{/privacy}">Privacy Policy</a>
                         </label>
                     </div>
                 </div>
@@ -192,7 +206,7 @@
         <!-- Already have account -->
         <div class="text-center mt-4">
             <p class="mb-2">Already have an account?</p>
-            <a href="/login" class="btn btn-outline-primary">
+            <a th:href="@{/login}" class="btn btn-outline-primary">
                 Sign In
             </a>
         </div>
@@ -234,10 +248,10 @@
             </div>
             <div class="col-md-4">
                 <h5>Quick Links</h5>
-                <a href="/help" class="text-light d-block">Help Center</a>
-                <a href="/shipping" class="text-light d-block">Shipping Info</a>
-                <a href="/returns" class="text-light d-block">Returns & Exchanges</a>
-                <a href="/privacy" class="text-light d-block">Privacy Policy</a>
+                <a th:href="@{/help}" class="text-light d-block">Help Center</a>
+                <a th:href="@{/shipping}" class="text-light d-block">Shipping Info</a>
+                <a th:href="@{/returns}" class="text-light d-block">Returns & Exchanges</a>
+                <a th:href="@{/privacy}" class="text-light d-block">Privacy Policy</a>
             </div>
         </div>
         <hr class="my-4">
@@ -250,20 +264,25 @@
 <script th:src="@{/js/jquery.min.js}"></script>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 <script>
-    // Check if user is already authenticated
+    // FIXED: Check if user is already authenticated
     function checkAuthStatus() {
         const token = localStorage.getItem("authToken");
         if (token) {
+            // Get URLs from data attributes
+            const apiConfig = $('#apiConfig');
+            const usersApiUrl = apiConfig.data('api-users');
+            const usersUrl = apiConfig.data('users-url');
+            
             // Verify the token is still valid
-            fetch('/api/users', {
+            fetch(usersApiUrl, {
                 headers: {
                     'Authorization': 'Bearer ' + token
                 }
             })
             .then(response => {
                 if (response.ok) {
-                    // User is already logged in, redirect to dashboard
-                    window.location.href = "/users";
+                    // User is already logged in, redirect to dashboard using Thymeleaf URL
+                    window.location.href = usersUrl;
                 }
                 // If token is invalid, we'll stay on register page
             })
@@ -313,8 +332,13 @@
         const originalText = submitBtn.html();
         submitBtn.html('Creating Account...').prop('disabled', true);
 
+        // FIXED: Get URLs from data attributes
+        const apiConfig = $('#apiConfig');
+        const registerApiUrl = apiConfig.data('api-auth-register');
+        const loginUrl = apiConfig.data('login-url');
+
         $.ajax({
-            url: '/api/auth/register',
+            url: registerApiUrl,
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(formData),
@@ -323,7 +347,7 @@
                 localStorage.removeItem("authToken");
                 showSuccess('Account created successfully! You can now log in.');
                 setTimeout(() => {
-                    window.location.href = '/login?registered=true';
+                    window.location.href = loginUrl + '?registered=true';
                 }, 2000);
             },
             error: function (xhr) {

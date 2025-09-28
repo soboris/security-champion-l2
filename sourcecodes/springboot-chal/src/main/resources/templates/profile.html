@@ -14,6 +14,21 @@
 <div th:replace="~{fragments/topnav :: topnav}"></div>
 
 <div class="container mt-4">
+    <!-- FIXED: API Configuration Data Attributes using proper Thymeleaf URL expressions -->
+    <div id="apiConfig" style="display: none;"
+         th:data-login-url="@{/login}"
+         th:data-users-url="@{/users}"
+         th:data-books-url="@{/books}"
+         th:data-cart-url="@{/cart}"
+         th:data-checkout-url="@{/checkout}"
+         th:data-api-users="@{/api/users}"
+         th:data-api-cart="@{/api/cart}"
+         th:data-api-profile="@{/api/profile}"
+         th:data-api-profile-update="@{/api/profile/update}"
+         th:data-api-profile-change-password="@{/api/profile/change-password}"
+         th:data-api-auth-login="@{/api/auth/login}">
+    </div>
+    
     <div class="row">
         <div class="col-md-8 offset-md-2">
             <h1>User Profile</h1>
@@ -169,7 +184,10 @@
         const authToken = localStorage.getItem("authToken");
         
         if (!authToken) {
-            window.location.href = "/login";
+            // FIXED: Get login URL from data attributes
+            const apiConfig = $('#apiConfig');
+            const loginUrl = apiConfig.data('login-url');
+            window.location.href = loginUrl;
             return;
         }
 
@@ -177,8 +195,13 @@
         loadUserProfile();
 
         function loadUserProfile() {
+            // FIXED: Get API URL from data attributes
+            const apiConfig = $('#apiConfig');
+            const profileApiUrl = apiConfig.data('api-profile');
+            const loginUrl = apiConfig.data('login-url');
+            
             $.ajax({
-                url: '/api/profile',
+                url: profileApiUrl,
                 type: 'GET',
                 headers: {
                     'Authorization': 'Bearer ' + authToken
@@ -208,7 +231,7 @@
                 error: function(xhr) {
                     if (xhr.status === 401 || xhr.status === 403) {
                         localStorage.removeItem("authToken");
-                        window.location.href = "/login";
+                        window.location.href = loginUrl;
                     } else {
                         showError('Failed to load profile data');
                     }
@@ -229,8 +252,12 @@
                 promotions: $('#promotions').is(':checked')
             };
 
+            // FIXED: Get API URL from data attributes
+            const apiConfig = $('#apiConfig');
+            const profileUpdateUrl = apiConfig.data('api-profile-update');
+
             $.ajax({
-                url: '/api/profile/update',
+                url: profileUpdateUrl,
                 type: 'POST',
                 headers: {
                     'Authorization': 'Bearer ' + authToken,
@@ -265,8 +292,12 @@
                 newPassword: newPassword
             };
 
+            // FIXED: Get API URL from data attributes
+            const apiConfig = $('#apiConfig');
+            const changePasswordUrl = apiConfig.data('api-profile-change-password');
+
             $.ajax({
-                url: '/api/profile/change-password',
+                url: changePasswordUrl,
                 type: 'POST',
                 headers: {
                     'Authorization': 'Bearer ' + authToken,

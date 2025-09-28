@@ -13,6 +13,15 @@
 <!-- Include navigation fragment -->
 <div th:replace="~{fragments/topnav :: topnav}"></div>
 
+<!-- FIXED: API Configuration Data Attributes using proper Thymeleaf URL expressions -->
+<div id="apiConfig" style="display: none;"
+     th:data-login-url="@{/login}"
+     th:data-books-url="@{/books}"
+     th:data-users-url="@{/users}"
+     th:data-api-purchase-confirm="@{/api/purchase/confirm}"
+     th:data-api-purchase-cancel="@{/api/purchase/cancel}">
+</div>
+
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -75,7 +84,7 @@
                         <div class="alert alert-danger text-center">
                             <h5><i class="fas fa-exclamation-circle"></i> Error</h5>
                             <p id="errorMessage">An error occurred while loading purchase details.</p>
-                            <a href="/books" class="btn btn-primary">Return to Books</a>
+                            <a th:href="@{/books}" class="btn btn-primary">Return to Books</a>
                         </div>
                     </div>
                 </div>
@@ -155,14 +164,22 @@
     function confirmPurchase() {
         const authToken = localStorage.getItem("authToken");
         if (!authToken) {
-            window.location.href = "/login";
+            // FIXED: Get login URL from data attributes
+            const apiConfig = $('#apiConfig');
+            const loginUrl = apiConfig.data('login-url');
+            window.location.href = loginUrl;
             return;
         }
 
         $('#confirmBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
 
+        // FIXED: Get API URL from data attributes
+        const apiConfig = $('#apiConfig');
+        const confirmUrl = apiConfig.data('api-purchase-confirm');
+        const usersUrl = apiConfig.data('users-url');
+
         $.ajax({
-            url: '/api/purchase/confirm',
+            url: confirmUrl,
             type: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + authToken,
@@ -180,7 +197,7 @@
                 
                 // Show success and redirect
                 alert('Purchase completed successfully! ' + response.bookTitle + ' has been added to your library.');
-                window.location.href = '/users?tab=books';
+                window.location.href = usersUrl + '?tab=books';
             },
             error: function(xhr) {
                 const errorResponse = xhr.responseJSON;
@@ -194,12 +211,20 @@
     function cancelPurchase() {
         const authToken = localStorage.getItem("authToken");
         if (!authToken) {
-            window.location.href = "/login";
+            // FIXED: Get login URL from data attributes
+            const apiConfig = $('#apiConfig');
+            const loginUrl = apiConfig.data('login-url');
+            window.location.href = loginUrl;
             return;
         }
 
+        // FIXED: Get API URL from data attributes
+        const apiConfig = $('#apiConfig');
+        const cancelUrl = apiConfig.data('api-purchase-cancel');
+        const booksUrl = apiConfig.data('books-url');
+
         $.ajax({
-            url: '/api/purchase/cancel',
+            url: cancelUrl,
             type: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + authToken,
@@ -213,12 +238,12 @@
                 localStorage.removeItem('purchaseConfirmation');
                 
                 // Redirect back to books
-                window.location.href = '/books';
+                window.location.href = booksUrl;
             },
             error: function(xhr) {
                 // Even if cancel fails, redirect back to books
                 localStorage.removeItem('purchaseConfirmation');
-                window.location.href = '/books';
+                window.location.href = booksUrl;
             }
         });
     }

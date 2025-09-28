@@ -52,10 +52,28 @@
     </style>
 </head>
 <body>
+    <!-- FIXED: API Configuration Data Attributes for navigation URLs -->
+    <div th:fragment="topnav-config" id="topnavConfig" style="display: none;"
+         th:data-home-url="@{/}"
+         th:data-books-url="@{/books}"
+         th:data-advanced-search-url="@{/advanced_search}"
+         th:data-users-url="@{/users}"
+         th:data-cart-url="@{/cart}"
+         th:data-help-url="@{/help}"
+         th:data-login-url="@{/login}"
+         th:data-register-url="@{/register}"
+         th:data-admin-url="@{/admin}"
+         th:data-profile-url="@{/profile}"
+         th:data-api-users="@{/api/users}"
+         th:data-api-cart="@{/api/cart}">
+    </div>
+
     <!-- Navigation Fragment -->
     <nav th:fragment="topnav" class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <!-- Include config data attributes -->
+        <div th:replace="~{fragments/topnav :: topnav-config}"></div>
         <div class="container">
-            <a class="navbar-brand" href="/">SecChamp Library</a>
+            <a class="navbar-brand" th:href="@{/}">SecChamp Library</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -96,42 +114,55 @@
                 $(`.nav-link[data-page="${currentPage}"]`).addClass('active');
             }
             
-            // Render navigation links based on authentication
+            // FIXED: Render navigation links based on authentication using data attributes
             function renderNav(isLoggedIn, userName, isAdmin) {
+                // Get URLs from data attributes
+                const config = $('#topnavConfig');
+                const homeUrl = config.data('home-url');
+                const booksUrl = config.data('books-url');
+                const advancedSearchUrl = config.data('advanced-search-url');
+                const usersUrl = config.data('users-url');
+                const cartUrl = config.data('cart-url');
+                const helpUrl = config.data('help-url');
+                const loginUrl = config.data('login-url');
+                const registerUrl = config.data('register-url');
+                const adminUrl = config.data('admin-url');
+                const profileUrl = config.data('profile-url');
+                
                 let navHtml = '';
                 if (isLoggedIn) {
                     navHtml = `
-                        <a class="nav-link" href="/" data-page="home">Home</a>
-                        <a class="nav-link" href="/books" data-page="books">Browse Books</a>
-                        <a class="nav-link" href="/advanced_search" data-page="advanced_search">Advanced Search</a>
-                        <a class="nav-link" href="/users" data-page="users">My Library</a>
-                        <a class="nav-link cart-icon" href="/cart" data-page="cart" title="Shopping Cart">
+                        <a class="nav-link" href="${homeUrl}" data-page="home">Home</a>
+                        <a class="nav-link" href="${booksUrl}" data-page="books">Browse Books</a>
+                        <a class="nav-link" href="${advancedSearchUrl}" data-page="advanced_search">Advanced Search</a>
+                        <a class="nav-link" href="${usersUrl}" data-page="users">My Library</a>
+                        <a class="nav-link cart-icon" href="${cartUrl}" data-page="cart" title="Shopping Cart">
                             🛒 <span class="cart-count" id="cartCount"></span>
                         </a>
-                        <a class="nav-link" href="/help" data-page="help">Help</a>`;
+                        <a class="nav-link" href="${helpUrl}" data-page="help">Help</a>`;
                     
                     if (isAdmin) {
-                        navHtml += `<a class="nav-link" href="/admin" data-page="admin">Admin Panel</a>`;
+                        navHtml += `<a class="nav-link" href="${adminUrl}" data-page="admin">Admin Panel</a>`;
                     }
                     
                     navHtml += `<span class="navbar-text me-2"> | Welcome,</span>
-                        <a class="nav-link" href="/profile" id="userProfile">${userName || 'User'}</a>
+                        <a class="nav-link" href="${profileUrl}" id="userProfile">${userName || 'User'}</a>
                         <button id="logoutBtn" class="btn btn-outline-light btn-sm">Logout</button>
                     `;
                 } else {
                     navHtml = `
-                        <a class="nav-link" href="/" data-page="home">Home</a>
-                        <a class="nav-link" href="/books" data-page="books">Browse Books</a>
-                        <a class="nav-link" href="/advanced_search" data-page="advanced_search">Advanced Search</a>
-                        <a class="nav-link" href="/help" data-page="help">Help</a>
-                        <a class="nav-link" href="/login" data-page="login">Login</a>
-                        <a class="nav-link" href="/register" data-page="register">Register</a>
+                        <a class="nav-link" href="${homeUrl}" data-page="home">Home</a>
+                        <a class="nav-link" href="${booksUrl}" data-page="books">Browse Books</a>
+                        <a class="nav-link" href="${advancedSearchUrl}" data-page="advanced_search">Advanced Search</a>
+                        <a class="nav-link" href="${helpUrl}" data-page="help">Help</a>
+                        <a class="nav-link" href="${loginUrl}" data-page="login">Login</a>
+                        <a class="nav-link" href="${registerUrl}" data-page="register">Register</a>
                     `;
                 }
                 $("#navbarContent").html(navHtml);
             }
             
-            // Global logout function that can be called from anywhere
+            // FIXED: Global logout function that can be called from anywhere
             window.performLogout = function() {
                 // Clear all authentication data
                 localStorage.removeItem("authToken");
@@ -146,11 +177,13 @@
                 renderNav(false);
                 highlightCurrentPage();
                 
-                // Redirect to login page
-                window.location.href = "/login";
+                // FIXED: Get login URL from data attributes
+                const config = $('#topnavConfig');
+                const loginUrl = config.data('login-url');
+                window.location.href = loginUrl;
             };
             
-            // Global function to update cart count
+            // FIXED: Global function to update cart count using data attributes
             window.updateCartCount = function() {
                 const authToken = localStorage.getItem("authToken");
                 if (!authToken) {
@@ -158,7 +191,11 @@
                     return;
                 }
                 
-                fetch('/api/cart', {
+                // Get API URL from data attributes
+                const config = $('#topnavConfig');
+                const cartApiUrl = config.data('api-cart');
+                
+                fetch(cartApiUrl, {
                     headers: {
                         'Authorization': 'Bearer ' + authToken
                     }
@@ -185,7 +222,11 @@
 
             const authToken = localStorage.getItem("authToken");
             if (authToken) {
-                fetch('/api/users', {
+                // FIXED: Get API URL from data attributes
+                const config = $('#topnavConfig');
+                const usersApiUrl = config.data('api-users');
+                
+                fetch(usersApiUrl, {
                     headers: {
                         'Authorization': 'Bearer ' + authToken
                     }
@@ -214,7 +255,7 @@
                 highlightCurrentPage();
             }
             
-            // Handle logout using event delegation for dynamically created button
+            // FIXED: Handle logout using event delegation for dynamically created button
             $(document).on('click', '#logoutBtn', function() {
                 // Clear all authentication data
                 localStorage.removeItem("authToken");
@@ -229,8 +270,10 @@
                 renderNav(false);
                 highlightCurrentPage();
                 
-                // Redirect to login page
-                window.location.href = "/login";
+                // FIXED: Get login URL from data attributes
+                const config = $('#topnavConfig');
+                const loginUrl = config.data('login-url');
+                window.location.href = loginUrl;
             });
         });
     </script>
