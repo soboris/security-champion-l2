@@ -16,22 +16,6 @@ docker build -f codeql/Dockerfile -t codeql:latest .
 docker build -f codeql/Dockerfile.arm64 -t codeql:arm64 .
 ```
 
-### 2. Run the Container
-
-```bash
-# Basic usage - start interactive shell
-docker run -it --rm codeql:latest
-
-# Mount your code for analysis (Linux/Mac)
-docker run -it --rm -v $(pwd):/workspace codeql:latest
-
-# Windows PowerShell version
-docker run -it --rm -v "${PWD}:/workspace" codeql:latest
-
-# Windows Command Prompt
-docker run -it --rm -v "%cd%:/workspace" codeql:latest
-```
-
 ## Sample Analysis Walkthrough
 
 The `/samples` directory contains:
@@ -44,7 +28,7 @@ The `/samples` directory contains:
 1. **Start the container with samples mounted:**
 ```bash
 # Linux/Mac
-docker run -it --rm -v $(pwd)/codeql/samples:/workspace codeql:latest
+docker run -it --rm -v $(pwd)/codeql/samples:/workspace codeql:arm64
 
 # Windows PowerShell
 docker run -it --rm -v "${PWD}/codeql/samples:/workspace" codeql:latest
@@ -67,10 +51,24 @@ codeql database create myapp-db --language=javascript --source-root=.
 
 3. **Run the sample query:**
 ```bash
+codeql pack download codeql/javascript-all
 codeql query run sample.ql --database=myapp-db
 ```
 
-4. **Run analysis with output:**
+result
+```
+codeql@9f3d6ac9c25b:/workspace$ codeql query run sample.ql --database=myapp-db
+Compiling query plan for /workspace/sample.ql.
+[1/1 comp 9.5s] Compiled /workspace/sample.ql.
+sample.ql: Evaluation completed (614ms).
+|      template       |                                        col1                                        |
++---------------------+------------------------------------------------------------------------------------+
+| `<h1>Se ... }</h1>` | XSS vulnerability at line 11: Template literal contains unescaped variable 'query' |
+| `<h1>We ... !</h1>` | XSS vulnerability at line 18: Template literal contains unescaped variable 'name'  |
+Shutting down query evaluator.
+```
+
+4. **Run analysis with output (csv):**
 ```bash
 codeql database analyze myapp-db sample.ql --format=csv --output=results.csv
 ```
@@ -78,71 +76,6 @@ codeql database analyze myapp-db sample.ql --format=csv --output=results.csv
 5. **View results:**
 ```bash
 cat results.csv
-```
-
-## Windows-Specific Commands
-
-For Windows users, here are the correct commands:
-
-### PowerShell
-```powershell
-# Build the image
-docker build -f codeql/Dockerfile -t codeql:latest .
-
-# Run with samples mounted
-docker run -it --rm -v "${PWD}/codeql/samples:/workspace" codeql:latest
-
-# Run with current directory mounted
-docker run -it --rm -v "${PWD}:/workspace" codeql:latest
-```
-
-### Command Prompt
-```cmd
-# Build the image
-docker build -f codeql/Dockerfile -t codeql:latest .
-
-# Run with samples mounted
-docker run -it --rm -v "%cd%/codeql/samples:/workspace" codeql:latest
-
-# Run with current directory mounted
-docker run -it --rm -v "%cd%:/workspace" codeql:latest
-```
-
-### Alternative: Use Absolute Paths
-```powershell
-# PowerShell - use full path
-docker run -it --rm -v "D:/development/secchamp2025/codeql/samples:/workspace" codeql:latest
-```
-
-## Common CodeQL Commands
-
-### Database Creation
-```bash
-# JavaScript/TypeScript
-codeql database create mydb --language=javascript --source-root=/path/to/code
-
-```
-
-### Query Execution
-```bash
-# Run a single query
-codeql query run query.ql --database=mydb
-
-# Run with output formats
-codeql database analyze mydb query.ql --format=sarif-latest --output=results.sarif
-codeql database analyze mydb query.ql --format=csv --output=results.csv
-```
-
-### Query Development
-```bash
-# Test query syntax
-codeql query compile query.ql
-
-# Format query
-codeql query format --in-place query.ql
-
-# Run query tests
-codeql test run /path/to/tests/
 ```
 
 ## Sample Vulnerabilities in sample.js
@@ -197,6 +130,7 @@ The `sample.ql` file is intentionally incomplete. Students should:
    - For permission issues, try: `sudo rm -rf myapp-db` (if needed)
 
 2. **Query compilation errors:**
+   - check existence of `qlpack.yml`
    - Verify query syntax with `codeql query compile`
    - Check import statements  
    - The container includes all necessary CodeQL libraries
