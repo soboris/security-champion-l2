@@ -1,2 +1,0 @@
-# Requirements for race_test_fixed.py
-requests>=2.25.0
