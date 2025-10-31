@@ -1,0 +1,161 @@
+{
+  "users": [
+    {
+      "username": "john_doe",
+      "email": "john_doe@company.com",
+      "password": "password",
+      "roles": ["USER", "CEO", "ADMIN"],
+      "displayName": "John Doe"
+    },
+    {
+      "username": "hr_manager",
+      "email": "hr_manager@company.com", 
+      "password": "password",
+      "roles": ["USER", "MANAGER", "HR"],
+      "displayName": "HR Manager"
+    },
+    {
+      "username": "hr_staff",
+      "email": "hr_staff@company.com", 
+      "password": "password",
+      "roles": ["USER", "HR"],
+      "displayName": "HR Staff"
+    },
+    {
+      "username": "it_manager",
+      "email": "it_manager@company.com",
+      "password": "password", 
+      "roles": ["USER", "MANAGER", "IT"],
+      "displayName": "IT Manager"
+    },
+    {
+      "username": "it_engineer",
+      "email": "it_engineer@company.com",
+      "password": "password", 
+      "roles": ["USER"],
+      "displayName": "IT Engineer"
+    }
+  ],
+  "tuples": [
+    {
+      "comment": "John Doe is the owner of the organization",
+      "user": "user:john_doe@company.com",
+      "relation": "owner",
+      "object": "organization:company"
+    },
+    {
+      "comment": "HR Manager is member of organization",
+      "user": "user:hr_manager@company.com",
+      "relation": "member",
+      "object": "organization:company"
+    },
+    {
+      "comment": "HR Staff is member of organization",
+      "user": "user:hr_staff@company.com",
+      "relation": "member",
+      "object": "organization:company"
+    },
+    {
+      "comment": "IT Manager is member of organization",
+      "user": "user:it_manager@company.com",
+      "relation": "member",
+      "object": "organization:company"
+    },
+    {
+      "comment": "IT Engineer is member of organization",
+      "user": "user:it_engineer@company.com",
+      "relation": "member",
+      "object": "organization:company"
+    },
+
+    {
+      "comment": "John Doe is the manager of Management department",
+      "user": "user:john_doe@company.com",
+      "relation": "manager",
+      "object": "department:management"
+    },
+
+    {
+      "comment": "HR manager is the manager of HR department",
+      "user": "user:hr_manager@company.com",
+      "relation": "manager",
+      "object": "department:hr"
+    },
+    {
+      "comment": "HR Staff is member of HR department",
+      "user": "user:hr_staff@company.com",
+      "relation": "member",
+      "object": "department:hr"
+    },
+
+    {
+      "comment": "IT manager is the manager of IT department",
+      "user": "user:it_manager@company.com",
+      "relation": "manager",
+      "object": "department:it"
+    },
+    {
+      "comment": "IT Engineer is member of IT department",
+      "user": "user:it_engineer@company.com",
+      "relation": "member",
+      "object": "department:it"
+    },
+
+    {
+      "comment": "HR manager is the owner of all staff information",
+      "user": "user:hr_manager@company.com",
+      "relation": "owner",
+      "object": "documents:all_staff_info"
+    },
+    {
+      "comment": "John Doe (CEO) is the owner of all staff information",
+      "user": "user:john_doe@company.com",
+      "relation": "owner",
+      "object": "documents:all_staff_info"
+    },
+    {
+      "comment": "John Doe (CEO) can view all staff information",
+      "user": "user:john_doe@company.com",
+      "relation": "viewer",
+      "object": "documents:all_staff_info"
+    },
+    {
+      "comment": "HR Manager can view all staff information",
+      "user": "user:hr_manager@company.com",
+      "relation": "viewer",
+      "object": "documents:all_staff_info"
+    },
+    {
+      "comment": "HR Staff can view all staff information",
+      "user": "user:hr_staff@company.com",
+      "relation": "viewer",
+      "object": "documents:all_staff_info"
+    },
+
+    {
+      "comment": "IT manager is the owner of it resources",
+      "user": "user:it_manager@company.com",
+      "relation": "owner",
+      "object": "IT_resources:company_servers"
+    },
+    {
+      "comment": "John Doe (CEO) is the owner of it resources",
+      "user": "user:john_doe@company.com",
+      "relation": "owner",
+      "object": "IT_resources:company_servers"
+    },
+    
+    {
+      "comment": "IT Manager has it-admin access to company servers",
+      "user": "user:it_manager@company.com",
+      "relation": "it-admin",
+      "object": "IT_resources:company_servers"
+    },
+    {
+      "comment": "IT Engineer has it-admin access to company servers",
+      "user": "user:it_engineer@company.com",
+      "relation": "it-admin",
+      "object": "IT_resources:company_servers"
+    }
+  ]
+}

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voucher Redemption - SecChamp Bookstore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="fragments/topnav :: topnav"></div>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">🎟️ Voucher Redemption</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Success Message -->
+                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <strong>Success!</strong> <span th:text="${success}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Error!</strong> <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <p class="text-muted mb-4">
+                            Redeem your voucher codes to get free credits! Enter your voucher code below.
+                        </p>
+
+                        <div id="voucherForm">
+                            <div class="mb-3">
+                                <label for="voucherCode" class="form-label">Voucher Code <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="voucherCode" required 
+                                       placeholder="Enter voucher code (e.g., BUYBOOKS)" style="text-transform: uppercase;">
+                                <div class="form-text">
+                                    💡 Voucher codes are case-sensitive and must be entered exactly as provided.
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-primary btn-lg w-100" id="redeemBtn">
+                                🎁 Redeem Voucher
+                            </button>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="card bg-light">
+                            <div class="card-header">
+                                <h5 class="mb-0">📋 Available Voucher Codes</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled mb-0">
+                                    <li><code>BUYBOOKS</code> - 💰 100 credits</li>
+                                    <li><code>FREEREAD</code> - 💰 50 credits</li>
+                                    <li><code>STUDENT</code> - 💰 75 credits</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <div th:replace="fragments/topnav :: topnav-script"></div>
+    <script>
+        // Global variables for current user
+        let currentUserId = null;
+        let currentUserName = null;
+
+        // Auto-uppercase voucher code as user types
+        document.getElementById('voucherCode').addEventListener('input', function(e) {
+            this.value = this.value.toUpperCase();
+        });
+
+        // Voucher code to credits mapping
+        const voucherCredits = {
+            'BUYBOOKS': 100,
+            'FREEREAD': 50,
+            'STUDENT': 75
+        };
+
+        // Initialize page with current user data
+        document.addEventListener('DOMContentLoaded', function() {
+            const authToken = localStorage.getItem("authToken");
+            
+            if (authToken) {
+                // Fetch current user data
+                fetch('/api/users', {
+                    headers: {
+                        'Authorization': 'Bearer ' + authToken
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Authentication failed');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const currentUser = data[0];
+                    currentUserId = currentUser.id;
+                    currentUserName = currentUser.name;
+                    
+                    console.log('Current user loaded:', currentUserId);
+                })
+                .catch(error => {
+                    console.error('Error loading user data:', error);
+                    showMessage('Please log in to redeem vouchers.', 'danger');
+                    setTimeout(() => window.location.href = '/login', 2000);
+                });
+            } else {
+                showMessage('Please log in to redeem vouchers.', 'danger');
+                setTimeout(() => window.location.href = '/login', 2000);
+            }
+        });
+
+        // Handle voucher redemption
+        document.getElementById('redeemBtn').addEventListener('click', function() {
+            const voucherCode = document.getElementById('voucherCode').value.trim().toUpperCase();
+            
+            if (!voucherCode) {
+                showMessage('Please enter a voucher code.', 'warning');
+                return;
+            }
+
+            if (!currentUserId) {
+                showMessage('User not loaded. Please refresh the page.', 'danger');
+                return;
+            }
+
+            // Validate voucher code
+            if (!voucherCredits[voucherCode]) {
+                showMessage('Invalid voucher code!', 'danger');
+                return;
+            }
+
+            const creditsToAdd = voucherCredits[voucherCode];
+            
+            // Disable button during processing
+            const btn = document.getElementById('redeemBtn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Processing...';
+
+            // Call the API to add credits
+            fetch(`/api/users/${currentUserId}/credits`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    addCredits: creditsToAdd
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    showMessage(`Success! Added ${creditsToAdd} credits to ${currentUserName}. New credit limit: ${data.newCreditLimitAsDouble}`, 'success');
+                    document.getElementById('voucherCode').value = '';
+                } else if (data.error) {
+                    showMessage(`Error: ${data.error}`, 'danger');
+                } else {
+                    showMessage('Unexpected response from server.', 'warning');
+                }
+            })
+            .catch(error => {
+                console.error('Error redeeming voucher:', error);
+                showMessage('Failed to redeem voucher. Please try again.', 'danger');
+            })
+            .finally(() => {
+                // Re-enable button
+                btn.disabled = false;
+                btn.innerHTML = '🎁 Redeem Voucher';
+            });
+        });
+
+        // Show message function
+        function showMessage(message, type) {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+
+            // Create new alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <strong>${type === 'success' ? 'Success!' : type === 'danger' ? 'Error!' : 'Notice!'}</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            // Insert alert at the top of the card body
+            const cardBody = document.querySelector('.card-body');
+            cardBody.insertBefore(alertDiv, cardBody.firstChild);
+
+            // Auto-dismiss success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 5000);
+            }
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('voucherCode').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('redeemBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>

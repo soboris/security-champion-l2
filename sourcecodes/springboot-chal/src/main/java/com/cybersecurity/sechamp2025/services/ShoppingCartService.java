@@ -27,8 +27,8 @@ public class ShoppingCartService {
     @Autowired
     private BookService bookService;
 
-    @Autowired
-    private UserBookService userBookService;
+
+    
 
     public ShoppingCart getOrCreateActiveCart(String userId) {
         Optional<ShoppingCart> existingCart = shoppingCartRepository.findActiveCartByUserId(userId);
