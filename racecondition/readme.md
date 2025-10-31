@@ -1,8 +1,8 @@
 ### `PurchaseApiController.java` 
 is the original controller that is vulnerable to race condition (`sourcecodes/springboot-chal/src/main/java/com/cybersecurity/sechamp2025/controllers/api/PurchaseApiController.java`)
 
-### `PurchaseApiController_Fixed.java` 
-is the fixed version, you can copy the file content to replace `sourcecodes/springboot-chal/src/main/java/com/cybersecurity/sechamp2025/controllers/api/PurchaseApiController.java`
+### `PurchaseApiController.java` 
+in this directory is the fixed version, you can copy the file content to replace `sourcecodes/springboot-chal/src/main/java/com/cybersecurity/sechamp2025/controllers/api/PurchaseApiController.java`
 
 ### To test
 `python race-test.py` to test for race condition
